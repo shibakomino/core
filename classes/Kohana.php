@@ -184,76 +184,33 @@ final class Kohana {
     return $value;
   }
 
-  /**
-   * Provides auto-loading support of classes that follow Kohana's [class
-   * naming conventions](kohana/conventions#class-names-and-file-location).
-   * See [Loading Classes](kohana/autoloading) for more information.
-   *
-   *     // Loads classes/My/Class/Name.php
-   *     self::auto_load('My_Class_Name');
-   *
-   * or with a custom directory:
-   *
-   *     // Loads vendor/My/Class/Name.php
-   *     self::auto_load('My_Class_Name', 'vendor');
-   *
-   * You should never have to call this function, as simply calling a class
-   * will cause it to be called.
-   *
-   * This function must be enabled as an autoloader in the bootstrap:
-   *
-   *     spl_autoload_register(array('Kohana', 'auto_load'));
-   *
-   * @param   string  $class      Class name
-   * @param   string  $directory  Directory to load from
-   * @return  boolean
-   */
-  public static function auto_load($class, $directory = 'classes')
+  //new autoloader compliant PSR4
+  public static function auto_load_PSR4($class, $directory = 'classes')
   {
-    // Transform the class name according to PSR-0
+    // Transform the class name according to PSR-4
     $class     = ltrim($class, '\\');
     $file      = '';
     $namespace = '';
+    $subnamespace = '';
 
-    if ($last_namespace_position = strripos($class, '\\'))
-    {
-      $namespace = substr($class, 0, $last_namespace_position);
-      $class     = substr($class, $last_namespace_position + 1);
-      $file      = str_replace('\\', DIRECTORY_SEPARATOR, $namespace).DIRECTORY_SEPARATOR;
+    if ($last_namespace_position = strripos($class, '\\')) {
+      $matches = [];
+      preg_match_all('/[^\\\]+/i', $class, $matches);
+
+      $namespace = array_shift($matches[0]);
+      $class = array_pop($matches[0]);
+      $subnamespace  = implode(DIRECTORY_SEPARATOR, $matches[0]);
+
+      $file      = $subnamespace.DIRECTORY_SEPARATOR.$class;
+
+      //backward compatible PSR-0
+      $file = str_replace('_', DIRECTORY_SEPARATOR, $file);
+    }else{
+      //no back slash found, use PSR-0
+      $file = str_replace('_', DIRECTORY_SEPARATOR, $class);
     }
 
-    $file .= str_replace('_', DIRECTORY_SEPARATOR, $class);
-
-    if ($path = self::find_file($directory, $file))
-    {
-      // Load the class file
-      require $path;
-
-      // Class has been found
-      return TRUE;
-    }
-
-    // Class is not in the filesystem
-    return FALSE;
-  }
-
-  /**
-   * Provides auto-loading support of classes that follow Kohana's old class
-   * naming conventions.
-   *
-   * This is included for compatibility purposes with older modules.
-   *
-   * @param   string  $class      Class name
-   * @param   string  $directory  Directory to load from
-   * @return  boolean
-   */
-  public static function auto_load_lowercase($class, $directory = 'classes')
-  {
-    // Transform the class name into a path
-    $file = str_replace('_', DIRECTORY_SEPARATOR, strtolower($class));
-
-    if ($path = self::find_file($directory, $file))
-    {
+    if ($path = self::find_file($directory, $file)) {
       // Load the class file
       require $path;
 

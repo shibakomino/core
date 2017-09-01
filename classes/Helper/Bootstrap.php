@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php namespace Kohana\Helper;
 /**
  * Created by PhpStorm.
  * User: colinleung
@@ -6,11 +6,10 @@
  * Time: 11:39 AM
  */
 
-class Helper_Bootstrap{
+class Bootstrap{
   public static $sub_request_handlers = array();
 
   public static function get_protocol(){
-
 
     if(!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])){
       return $_SERVER['HTTP_X_FORWARDED_PROTO'];
@@ -21,29 +20,6 @@ class Helper_Bootstrap{
     }
 
     return 'http';
-  }
-
-  private static function redirect_insecure(){
-    if(!empty($_POST))return FALSE;
-    if(!isset(Kohana::$config))return FALSE;
-    $ssl_enable = Kohana::$config->load('site.ssl_enable');
-    $current_protocol = self::get_protocol();
-
-    if($ssl_enable === TRUE && $current_protocol == 'http'){
-      if(preg_match('/^local./i', $_SERVER['HTTP_HOST'])==1)return FALSE;
-
-      $url = "https://". $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
-      //CHECK: why trim the query string.
-//      if(!empty($_SERVER['QUERY_STRING'])){
-//        $url = str_replace('?'.$_SERVER['QUERY_STRING'], '', $url);
-//      }
-
-      header('Location: '.$url);
-      return TRUE;
-    }
-
-    return FALSE;
   }
 
   private static function redirect_upper_url(){
@@ -68,10 +44,9 @@ class Helper_Bootstrap{
   }
 
   public static function executeRequest(){
-    if(Helper_Bootstrap::redirect_insecure() == TRUE)return '<!-- redirect SSL -->';
-    if(Helper_Bootstrap::redirect_upper_url() == TRUE)return '<!-- redirect upper url -->';
+    if(self::redirect_upper_url() == TRUE)return '<!-- redirect upper url -->';
 
-    $request    = Request::factory(TRUE,array(),FALSE);
+    $request    = \Request::factory(TRUE,array(),FALSE);
     $response   = $request->execute();//param need to parse after execute.
 
     //default city name;
@@ -94,13 +69,13 @@ class Helper_Bootstrap{
       ->send_headers(TRUE)
       ->body();
 
-    if(Kohana::getEnvironment() == Kohana::DEVELOPMENT){
+    if(\Kohana::getEnvironment() == \Kohana::DEVELOPMENT){
       $result .= self::append_debug_message($request, $response);
     }
     return $result;
   }
 
-  private static function append_debug_message($request, $response){
+  private static function append_debug_message(\Request $request, $response){
     if($request->param('format')=='php'){
       $debug_msg = $response->headers('X-D3CMS');
       if(!empty($debug_msg)){
