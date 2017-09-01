@@ -266,6 +266,19 @@ final class Kohana {
   }
 
   /**
+   * Loads a file within a totally empty scope and returns the output:
+   *
+   *     $foo = Kohana::load('foo.php');
+   *
+   * @param   string  $file
+   * @return  mixed
+   */
+  public static function load($file)
+  {
+    return include $file;
+  }
+
+  /**
    * Changes the currently enabled modules. Module paths may be relative
    * or absolute, but must point to a directory:
    *
@@ -312,6 +325,10 @@ final class Kohana {
     // Set the current module list
     self::$_modules = $modules;
 
+    return self::$_modules;
+  }
+
+  public static function modules_init(){
     foreach (self::$_modules as $path)
     {
       $init = $path.'init'.EXT;
@@ -322,8 +339,6 @@ final class Kohana {
         require_once $init;
       }
     }
-
-    return self::$_modules;
   }
 
   /**
