@@ -329,6 +329,7 @@ class Kohana_Core {
 		$_POST   = Kohana::sanitize($_POST);
 		$_COOKIE = Kohana::sanitize($_COOKIE);
 
+		return;
 		// Load the logger if one doesn't already exist
 		if ( ! Kohana::$log instanceof Log)
 		{
