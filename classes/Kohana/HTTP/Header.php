@@ -880,12 +880,8 @@ class Kohana_HTTP_Header extends ArrayObject {
 
 		if ( ! isset($headers['content-type']))
 		{
-			$processed_headers[] = 'Content-Type: '.Kohana::$content_type.'; charset='.Kohana::$charset;
-		}
 
-		if (Kohana::$expose AND ! isset($headers['x-powered-by']))
-		{
-			$processed_headers[] = 'X-Powered-By: '.Kohana::version();
+			$processed_headers[] = 'Content-Type: text/html; charset=utf-8';
 		}
 
 		// Get the cookies and apply

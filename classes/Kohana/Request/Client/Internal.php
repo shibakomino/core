@@ -45,21 +45,6 @@ class Kohana_Request_Client_Internal extends Request_Client {
 			$prefix .= str_replace(array('\\', '/'), '_', trim($directory, '/')).'_';
 		}
 
-		if (Kohana::$profiling)
-		{
-			// Set the benchmark name
-			$benchmark = '"'.$request->uri().'"';
-
-			if ($request !== Request::$initial AND Request::$current)
-			{
-				// Add the parent request uri
-				$benchmark .= ' « "'.Request::$current->uri().'"';
-			}
-
-			// Start benchmarking
-			$benchmark = Profiler::start('Requests', $benchmark);
-		}
-
 		// Store the currently active request
 		$previous = Request::$current;
 
@@ -73,10 +58,10 @@ class Kohana_Request_Client_Internal extends Request_Client {
 		{
 			if ( ! class_exists($prefix.$controller))
 			{
-				throw HTTP_Exception::factory(404,
-					'The requested URL :uri was not found on this server.',
-					array(':uri' => $request->uri())
-				)->request($request);
+        throw HTTP_Exception::factory(404,
+          'The requested URL :uri was not found on this server.',
+          array(':uri' => $request->uri())
+        )->request($request);
 			}
 
 			// Load the controller using reflection
@@ -84,10 +69,10 @@ class Kohana_Request_Client_Internal extends Request_Client {
 
 			if ($class->isAbstract())
 			{
-				throw new Kohana_Exception(
-					'Cannot create instances of abstract :controller',
-					array(':controller' => $prefix.$controller)
-				);
+        throw new Kohana_Exception(
+          'Cannot create instances of abstract :controller',
+          array(':controller' => $prefix.$controller)
+        );
 			}
 
 			// Create a new instance of the controller

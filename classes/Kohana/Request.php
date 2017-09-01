@@ -262,19 +262,20 @@ class Kohana_Request implements HTTP_Request {
 			}
 
 			// Get the path from the base URL, including the index file
-			$base_url = parse_url(Kohana::$base_url, PHP_URL_PATH);
+			$base_url = parse_url(Kohana::getBaseURL(), PHP_URL_PATH);
 
 			if (strpos($uri, $base_url) === 0)
 			{
 				// Remove the base URL from the URI
 				$uri = (string) substr($uri, strlen($base_url));
 			}
-
+      //do rewriting in htaccess.
+      /*
 			if (Kohana::$index_file AND strpos($uri, Kohana::$index_file) === 0)
 			{
 				// Remove the index file from the URI
 				$uri = (string) substr($uri, strlen(Kohana::$index_file));
-			}
+			}*/
 		}
 
 		return $uri;
