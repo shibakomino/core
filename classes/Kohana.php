@@ -202,7 +202,6 @@ final class Kohana {
       $subnamespace  = implode(DIRECTORY_SEPARATOR, $matches[0]);
 
       $file      = $subnamespace.DIRECTORY_SEPARATOR.$class;
-
     }else{
       //no back slash found, use PSR-0
       $file = str_replace('_', DIRECTORY_SEPARATOR, $class);
