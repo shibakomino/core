@@ -197,14 +197,12 @@ final class Kohana {
       $matches = [];
       preg_match_all('/[^\\\]+/i', $class, $matches);
 
-      $namespace = array_shift($matches[0]);
+//    $namespace = array_shift($matches[0]);
       $class = array_pop($matches[0]);
       $subnamespace  = implode(DIRECTORY_SEPARATOR, $matches[0]);
 
       $file      = $subnamespace.DIRECTORY_SEPARATOR.$class;
 
-      //backward compatible PSR-0
-      $file = str_replace('_', DIRECTORY_SEPARATOR, $file);
     }else{
       //no back slash found, use PSR-0
       $file = str_replace('_', DIRECTORY_SEPARATOR, $class);
