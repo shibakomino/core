@@ -8,7 +8,7 @@
  * @copyright  (c) 2007-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-class Kohana_Arr {
+class Arr {
 
 	/**
 	 * @var  string  default delimiter for path()
