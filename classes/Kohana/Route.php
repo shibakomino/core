@@ -78,7 +78,7 @@ class Kohana_Route {
 	 * Stores a named route and returns it. The "action" will always be set to
 	 * "index" if it is not defined.
 	 *
-	 *     Route::set('default', '(<controller>(/<action>(/<id>)))')
+	 *     static::set('default', '(<controller>(/<action>(/<id>)))')
 	 *         ->defaults(array(
 	 *             'controller' => 'welcome',
 	 *         ));
@@ -90,13 +90,13 @@ class Kohana_Route {
 	 */
 	public static function set($name, $uri = NULL, $regex = NULL)
 	{
-		return Route::$_routes[$name] = new Route($uri, $regex);
+		return static::$_routes[$name] = new Route($uri, $regex);
 	}
 
 	/**
 	 * Retrieves a named route.
 	 *
-	 *     $route = Route::get('default');
+	 *     $route = static::get('default');
 	 *
 	 * @param   string  $name   route name
 	 * @return  Route
@@ -110,92 +110,32 @@ class Kohana_Route {
 				array(':route' => $name));
 		}
 
-		return Route::$_routes[$name];
+		return static::$_routes[$name];
 	}
 
 	/**
 	 * Retrieves all named routes.
 	 *
-	 *     $routes = Route::all();
+	 *     $routes = static::all();
 	 *
 	 * @return  array  routes by name
 	 */
 	public static function all()
 	{
-		return Route::$_routes;
+		return static::$_routes;
 	}
 
 	/**
 	 * Get the name of a route.
 	 *
-	 *     $name = Route::name($route)
+	 *     $name = static::name($route)
 	 *
 	 * @param   Route   $route  instance
 	 * @return  string
 	 */
 	public static function name(Route $route)
 	{
-		return array_search($route, Route::$_routes);
-	}
-
-	/**
-	 * Saves or loads the route cache. If your routes will remain the same for
-	 * a long period of time, use this to reload the routes from the cache
-	 * rather than redefining them on every page load.
-	 *
-	 *     if ( ! Route::cache())
-	 *     {
-	 *         // Set routes here
-	 *         Route::cache(TRUE);
-	 *     }
-	 *
-	 * @param   boolean $save   cache the current routes
-	 * @param   boolean $append append, rather than replace, cached routes when loading
-	 * @return  void    when saving routes
-	 * @return  boolean when loading routes
-	 * @uses    Kohana::cache
-	 */
-	public static function cache($save = FALSE, $append = FALSE)
-	{
-		if ($save === TRUE)
-		{
-			try
-			{
-				// Cache all defined routes
-				Kohana::cache('Route::cache()', Route::$_routes);
-			}
-			catch (Exception $e)
-			{
-				// We most likely have a lambda in a route, which cannot be cached
-				throw new Kohana_Exception('One or more routes could not be cached (:message)', array(
-						':message' => $e->getMessage(),
-					), 0, $e);
-			}
-		}
-		else
-		{
-			if ($routes = Kohana::cache('Route::cache()'))
-			{
-				if ($append)
-				{
-					// Append cached routes
-					Route::$_routes += $routes;
-				}
-				else
-				{
-					// Replace existing routes
-					Route::$_routes = $routes;
-				}
-
-				// Routes were cached
-				return Route::$cache = TRUE;
-			}
-			else
-			{
-				// Routes were not cached
-				return Route::$cache = FALSE;
-			}
-		}
+		return array_search($route, static::$_routes);
 	}
 
 	/**
@@ -212,7 +152,7 @@ class Kohana_Route {
 	 */
 	public static function url($name, array $params = NULL, $protocol = NULL)
 	{
-		$route = Route::get($name);
+		$route = static::get($name);
 
 		// Create a URI with the route and convert it to a URL
 		if ($route->is_external())
@@ -225,7 +165,7 @@ class Kohana_Route {
 	 * Returns the compiled regular expression for the route. This translates
 	 * keys and optional groups to a proper PCRE regular expression.
 	 *
-	 *     $compiled = Route::compile(
+	 *     $compiled = static::compile(
 	 *        '<controller>(/<action>(/<id>))',
 	 *         array(
 	 *           'controller' => '[a-z]+',
@@ -234,8 +174,8 @@ class Kohana_Route {
 	 *     );
 	 *
 	 * @return  string
-	 * @uses    Route::REGEX_ESCAPE
-	 * @uses    Route::REGEX_SEGMENT
+	 * @uses    static::REGEX_ESCAPE
+	 * @uses    static::REGEX_SEGMENT
 	 */
 	public static function compile($uri, array $regex = NULL)
 	{
@@ -306,7 +246,7 @@ class Kohana_Route {
 	 * @param   string  $uri    route URI pattern
 	 * @param   array   $regex  key patterns
 	 * @return  void
-	 * @uses    Route::_compile
+	 * @uses    static::_compile
 	 */
 	public function __construct($uri = NULL, $regex = NULL)
 	{
@@ -327,7 +267,7 @@ class Kohana_Route {
 		}
 
 		// Store the compiled regex locally
-		$this->_route_regex = Route::compile($uri, $regex);
+		$this->_route_regex = static::compile($uri, $regex);
 	}
 
 	/**
@@ -388,7 +328,7 @@ class Kohana_Route {
 	{
 		if ( ! is_callable($callback))
 		{
-			throw new Kohana_Exception('Invalid Route::callback specified');
+			throw new Kohana_Exception('Invalid static::callback specified');
 		}
 
 		$this->_filters[] = $callback;
@@ -488,7 +428,7 @@ class Kohana_Route {
 	 */
 	public function is_external()
 	{
-		return ! in_array(Arr::get($this->_defaults, 'host', FALSE), Route::$localhosts);
+		return ! in_array(Arr::get($this->_defaults, 'host', FALSE), static::$localhosts);
 	}
 
 	/**
@@ -504,8 +444,8 @@ class Kohana_Route {
 	 * @param   array   $params URI parameters
 	 * @return  string
 	 * @throws  Kohana_Exception
-	 * @uses    Route::REGEX_GROUP
-	 * @uses    Route::REGEX_KEY
+	 * @uses    static::REGEX_GROUP
+	 * @uses    static::REGEX_KEY
 	 */
 	public function uri(array $params = NULL)
 	{
@@ -531,7 +471,7 @@ class Kohana_Route {
 		{
 			$missing = array();
 
-			$pattern = '#(?:'.Route::REGEX_KEY.'|'.Route::REGEX_GROUP.')#';
+			$pattern = '#(?:'. static::REGEX_KEY . '|' . static::REGEX_GROUP.')#';
 			$result = preg_replace_callback($pattern, function ($matches) use (&$compile, $defaults, &$missing, $params, &$required)
 			{
 				if ($matches[0][0] === '<')
@@ -599,7 +539,7 @@ class Kohana_Route {
 			if (strpos($host, '://') === FALSE)
 			{
 				// Use the default defined protocol
-				$host = Route::$default_protocol.$host;
+				$host = static::$default_protocol.$host;
 			}
 
 			// Clean up the host and prepend it to the URI
