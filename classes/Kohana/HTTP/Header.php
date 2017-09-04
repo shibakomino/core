@@ -14,6 +14,7 @@
  */
 class Kohana_HTTP_Header extends ArrayObject {
   static $str_default_content_type = 'Content-Type: text/html; charset=utf-8';
+  static $mime = [];
 
 	// Default Accept-* quality value if none supplied
 	const DEFAULT_QUALITY = 1;
@@ -492,7 +493,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 		// If not a real mime, try and find it in config
 		if (strpos($type, '/') === FALSE)
 		{
-			$mime = Kohana::$config->load('mimes.'.$type);
+			$mime = static::mime;
 
 			if ($mime === NULL)
 				return FALSE;
@@ -914,16 +915,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 
 		foreach ($headers as $key => $line)
 		{
-			if ($key == 'Set-Cookie' AND is_array($line))
-			{
-				// Send cookies
-				foreach ($line as $name => $value)
-				{
-					Cookie::set($name, $value['value'], $value['expiration']);
-				}
-
-				continue;
-			}
+      //EVENT_SEND_HEADER
 
 			header($line, $replace);
 		}
