@@ -12,9 +12,23 @@
  */
 class Kohana_URL {
   static $base_url = '/';
+  static $index_file = '';
+  static $trusted_hosts = [];
 
   public static function set_base_url($url = '/'){
-    self::$base_url = rtrim($url, '/').'/';
+    static::$base_url = rtrim($url, '/').'/';
+  }
+
+  public static function set_index_file($file = ''){
+    static::$index_file = $file;
+  }
+
+  public static function get_index_file(){
+    return static::$index_file;
+  }
+
+  public static function set_trusted_hosts(array $hosts){
+    static::$trusted_hosts = $hosts;
   }
 
 	/**
@@ -70,10 +84,10 @@ class Kohana_URL {
 			$protocol = parse_url($base_url, PHP_URL_SCHEME);
 		}
 
-		if ($index === TRUE AND ! empty(Kohana::$index_file))
+		if ($index === TRUE AND ! empty(static::$index_file))
 		{
 			// Add the index file to the URL
-			$base_url .= Kohana::$index_file.'/';
+			$base_url .= static::$index_file.'/';
 		}
 
 		if (is_string($protocol))
@@ -254,15 +268,12 @@ class Kohana_URL {
 	{
 
 		// If list of trusted hosts is not directly provided read from config
-		if (empty($trusted_hosts))
-		{
-			$trusted_hosts = (array) Kohana::$config->load('url')->get('trusted_hosts');
+		if (empty($trusted_hosts)) {
+			$trusted_hosts = static::$trusted_hosts;
 		}
 
 		// loop through the $trusted_hosts array for a match
-		foreach ($trusted_hosts as $trusted_host)
-		{
-
+		foreach ($trusted_hosts as $trusted_host) {
 			// make sure we fully match the trusted hosts
 			$pattern = '#^'.$trusted_host.'$#uD';
 
@@ -270,11 +281,9 @@ class Kohana_URL {
 			if (preg_match($pattern, $host)) {
 				return TRUE;
 			}
-
 		}
 
 		// return FALSE as nothing is matched
 		return FALSE;
-
 	}
 }
