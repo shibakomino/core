@@ -27,10 +27,7 @@ final class Kohana {
   /**
    * @var  string  Current environment name
    */
-  private static $environment = self::DEVELOPMENT;
-
-  private static $base_url = '/';
-
+  private static $environment = self::PRODUCTION;
   private static $_init = FALSE;
 
   /**
@@ -66,19 +63,18 @@ final class Kohana {
    * `boolean` | caching    | Cache file locations to speed up [self::find_file].  This has nothing to do with [self::cache], [Fragments](kohana/fragments) or the [Cache module](cache).  <br /> <br />  Recommended setting: `FALSE` while developing, `TRUE` on production servers. | `FALSE`
    * `boolean` | expose     | Set the X-Powered-By header
    *
-   * @throws  Kohana_Exception
-   * @param   array   $settings   Array of settings.  See above.
+   * @param   string   $enviorment.
    * @return  void
    * @uses    self::globals
    * @uses    self::sanitize
-   * @uses    self::cache
-   * @uses    Profiler
    */
-  public static function init(array $settings = NULL)
+  public static function init($enviorment)
   {
     //guard initalize twice.
     if (self::$_init) return;
     self::$_init = true;
+
+    self::$environment = $enviorment;
 
     //guard unusal global settings
     if (ini_get('register_globals')) {
@@ -89,10 +85,6 @@ final class Kohana {
     // Start an output buffer
     ob_start();
 
-    if (isset($settings['base_url'])) {
-      // Set the base URL
-      self::$base_url = rtrim($settings['base_url'], '/').'/';
-    }
 
     // Sanitize all request variables
     $_GET    = self::sanitize($_GET);
@@ -115,8 +107,7 @@ final class Kohana {
    */
   public static function globals()
   {
-    if (isset($_REQUEST['GLOBALS']) OR isset($_FILES['GLOBALS']))
-    {
+    if (isset($_REQUEST['GLOBALS']) OR isset($_FILES['GLOBALS'])) {
       // Prevent malicious GLOBALS overload attack
       echo "Global variable overload attack detected! Request aborted.\n";
 
@@ -128,20 +119,19 @@ final class Kohana {
     $global_variables = array_keys($GLOBALS);
 
     // Remove the standard global variables from the list
-    $global_variables = array_diff($global_variables, array(
-      '_COOKIE',
-      '_ENV',
-      '_GET',
-      '_FILES',
-      '_POST',
-      '_REQUEST',
-      '_SERVER',
-      '_SESSION',
-      'GLOBALS',
-    ));
+    $global_variables = array_diff($global_variables, [
+        '_COOKIE',
+        '_ENV',
+        '_GET',
+        '_FILES',
+        '_POST',
+        '_REQUEST',
+        '_SERVER',
+        '_SESSION',
+        'GLOBALS',
+    ]);
 
-    foreach ($global_variables as $name)
-    {
+    foreach ($global_variables as $name) {
       // Unset the global variable, effectively disabling register_globals
       unset($GLOBALS[$name]);
     }
@@ -158,24 +148,14 @@ final class Kohana {
    */
   public static function sanitize($value)
   {
-    if (is_array($value) OR is_object($value))
-    {
-      foreach ($value as $key => $val)
-      {
+    if (is_array($value) OR is_object($value)) {
+      foreach ($value as $key => $val) {
         // Recursively clean each value
         $value[$key] = self::sanitize($val);
       }
     }
-    elseif (is_string($value))
-    {
-      if (self::$magic_quotes === TRUE)
-      {
-        // Remove slashes added by magic quotes
-        $value = stripslashes($value);
-      }
-
-      if (strpos($value, "\r") !== FALSE)
-      {
+    elseif (is_string($value)) {
+      if (strpos($value, "\r") !== FALSE) {
         // Standardize newlines
         $value = str_replace(array("\r\n", "\r"), "\n", $value);
       }
@@ -238,36 +218,29 @@ final class Kohana {
    *
    *     self::modules(array('modules/foo', MODPATH.'bar'));
    *
-   * @param   array   $modules    list of module paths
-   * @return  array   enabled modules
-   * @throws
+   * @param   array   $modules                  list of module paths
+   * @param   boolean $display_missing_module   should it echo the missing module name
+   * @return  boolean                           is modules ready to init?
    */
-  public static function modules(array $modules = NULL)
+
+  public static function modules($modules, $display_missing_module)
   {
-    if ($modules === NULL)
-    {
-      // Not changing modules, just return the current set
-      return self::$_modules;
-    }
+    if(!isset($modules))return false;
 
     // Start a new list of include paths, APPPATH first
-    $paths = array(APPPATH);
+    $paths = [APPPATH];
 
-    foreach ($modules as $name => $path)
-    {
-      if (is_dir($path))
-      {
-        // Add the module to include paths
-        $paths[] = $modules[$name] = realpath($path).DIRECTORY_SEPARATOR;
+    foreach ($modules as $name => $path) {
+      if(!is_dir($path)){
+        //module path is missing, break it.
+        if($display_missing_module){
+          echo 'module '. $name .' is missing';
+        }
+        return false;
       }
-      else
-      {
-        // This module is invalid, remove it
-        throw new Kohana_Exception('Attempted to load an invalid or missing module \':module\' at \':path\'', array(
-          ':module' => $name,
-          ':path'   => Debug::path($path),
-        ));
-      }
+
+      // Add the module to include paths
+      $paths[] = $modules[$name] = realpath($path).DIRECTORY_SEPARATOR;
     }
 
     // Finish the include paths by adding SYSPATH
@@ -279,16 +252,17 @@ final class Kohana {
     // Set the current module list
     self::$_modules = $modules;
 
-    return self::$_modules;
+    return true;
   }
 
-  public static function modules_init(){
-    foreach (self::$_modules as $path)
-    {
-      $init = $path.'init'.EXT;
+  /**
+   * Initialize the modules by running [module]/init.php
+  **/
 
-      if (is_file($init))
-      {
+  public static function modules_init(){
+    foreach (self::$_modules as $path) {
+      $init = $path.'init'.EXT;
+      if (is_file($init)) {
         // Include the module initialization file once
         require_once $init;
       }
@@ -478,12 +452,7 @@ final class Kohana {
     return $found;
   }
 
-  public static function getBaseURL(){
-    return self::$base_url;
-  }
-
   public static function getEnvironment(){
     return self::$environment;
   }
-
 }
