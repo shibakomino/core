@@ -935,8 +935,7 @@ class Kohana_Request implements HTTP_Request {
 	 * @return  Response
 	 * @throws  Request_Exception
 	 * @throws  HTTP_Exception_404
-	 * @uses    [Kohana::$profiling]
-	 * @uses    [Profiler]
+
 	 */
 	public function execute()
 	{

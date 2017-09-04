@@ -91,8 +91,6 @@ abstract class Kohana_Request_Client {
 	 * @param   Response  $response
 	 * @return  Response
 	 * @throws  Kohana_Exception
-	 * @uses    [Kohana::$profiling]
-	 * @uses    [Profiler]
 	 */
 	public function execute(Request $request)
 	{
