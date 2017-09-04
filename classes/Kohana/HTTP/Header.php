@@ -13,6 +13,7 @@
  * @license    http://kohanaframework.org/license
  */
 class Kohana_HTTP_Header extends ArrayObject {
+  static $str_default_content_type = 'Content-Type: text/html; charset=utf-8';
 
 	// Default Accept-* quality value if none supplied
 	const DEFAULT_QUALITY = 1;
@@ -880,15 +881,9 @@ class Kohana_HTTP_Header extends ArrayObject {
 
 		if ( ! isset($headers['content-type']))
 		{
-
-			$processed_headers[] = 'Content-Type: text/html; charset=utf-8';
+			$processed_headers[] = static::$str_default_content_type;
 		}
-
-		// Get the cookies and apply
-		if ($cookies = $response->cookie())
-		{
-			$processed_headers['Set-Cookie'] = $cookies;
-		}
+    //EVENT_SEND_HEADER
 
 		if (is_callable($callback))
 		{
