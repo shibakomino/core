@@ -1,4 +1,5 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
+
 /**
  * Request Client for internal execution
  *
@@ -39,11 +40,12 @@ class Kohana_Request_Client_Internal extends Request_Client {
 		// Controller
 		$controller = $request->controller();
 
-		if ($directory)
-		{
+		if ($directory) {
 			// Add the directory name to the class prefix
 			$prefix .= str_replace(array('\\', '/'), '_', trim($directory, '/')).'_';
 		}
+
+    //EVENT_EXECUTE_START
 
 		// Store the currently active request
 		$previous = Request::$current;
@@ -54,25 +56,22 @@ class Kohana_Request_Client_Internal extends Request_Client {
 		// Is this the initial request
 		$initial_request = ($request === Request::$initial);
 
-		try
-		{
-			if ( ! class_exists($prefix.$controller))
-			{
-        throw HTTP_Exception::factory(404,
-          'The requested URL :uri was not found on this server.',
-          array(':uri' => $request->uri())
-        )->request($request);
+		try {
+			if ( ! class_exists($prefix.$controller)) {
+				throw HTTP_Exception::factory(404,
+					'The requested URL :uri was not found on this server.',
+					array(':uri' => $request->uri())
+				)->request($request);
 			}
 
 			// Load the controller using reflection
 			$class = new ReflectionClass($prefix.$controller);
 
-			if ($class->isAbstract())
-			{
-        throw new Kohana_Exception(
-          'Cannot create instances of abstract :controller',
-          array(':controller' => $prefix.$controller)
-        );
+			if ($class->isAbstract()) {
+				throw new Kohana_Exception(
+					'Cannot create instances of abstract :controller',
+					array(':controller' => $prefix.$controller)
+				);
 			}
 
 			// Create a new instance of the controller
@@ -81,25 +80,19 @@ class Kohana_Request_Client_Internal extends Request_Client {
 			// Run the controller's execute() method
 			$response = $class->getMethod('execute')->invoke($controller);
 
-			if ( ! $response instanceof Response)
-			{
+			if ( ! $response instanceof Response) {
 				// Controller failed to return a Response.
 				throw new Kohana_Exception('Controller failed to return a Response');
 			}
-		}
-		catch (HTTP_Exception $e)
-		{
+		} catch (HTTP_Exception $e) {
 			// Store the request context in the Exception
-			if ($e->request() === NULL)
-			{
+			if ($e->request() === NULL) {
 				$e->request($request);
 			}
 
 			// Get the response via the Exception
 			$response = $e->get_response();
-		}
-		catch (Exception $e)
-		{
+		} catch (Exception $e) {
 			// Generate an appropriate Response object
 			$response = Kohana_Exception::_handler($e);
 		}
@@ -107,11 +100,7 @@ class Kohana_Request_Client_Internal extends Request_Client {
 		// Restore the previous request
 		Request::$current = $previous;
 
-		if (isset($benchmark))
-		{
-			// Stop the benchmark
-			Profiler::stop($benchmark);
-		}
+		//EVENT_EXECUTE_END
 
 		// Return the response
 		return $response;
