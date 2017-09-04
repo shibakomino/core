@@ -51,8 +51,8 @@ class Kohana_URL {
 	 * @param   mixed    $protocol Protocol string, [Request], or boolean
 	 * @param   boolean  $index    Add index file to URL?
 	 * @return  string
-	 * @uses    Kohana::$index_file
 	 * @uses    Request::protocol()
+   * @throws
 	 */
 	public static function base($protocol = NULL, $index = FALSE)
 	{
@@ -266,8 +266,7 @@ class Kohana_URL {
 	 */
 	public static function is_trusted_host($host, array $trusted_hosts = NULL)
 	{
-
-		// If list of trusted hosts is not directly provided read from config
+    // If list of trusted hosts is not directly provided read from config
 		if (empty($trusted_hosts)) {
 			$trusted_hosts = static::$trusted_hosts;
 		}
