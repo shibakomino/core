@@ -511,7 +511,7 @@ class Kohana_Response implements HTTP_Response {
 
 		// Manually stop execution
 		ignore_user_abort(TRUE);
-    
+
 
 		// Send data in 16kb blocks
 		$block = 1024 * 16;
@@ -550,15 +550,8 @@ class Kohana_Response implements HTTP_Response {
 			{
 				// Create a text version of the exception
 				$error = Kohana_Exception::text($e);
+        //SEND_FILE_ERROR
 
-				if (is_object(Kohana::$log))
-				{
-					// Add this exception to the log
-					Kohana::$log->add(Log::ERROR, $error);
-
-					// Make sure the logs are written
-					Kohana::$log->write();
-				}
 
 				// Do NOT display the exception, it will corrupt the output!
 			}
