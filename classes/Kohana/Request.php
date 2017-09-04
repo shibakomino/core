@@ -262,20 +262,19 @@ class Kohana_Request implements HTTP_Request {
 			}
 
 			// Get the path from the base URL, including the index file
-			$base_url = parse_url(Kohana::getBaseURL(), PHP_URL_PATH);
+			$base_url = parse_url(URL::site(''), PHP_URL_PATH);
 
 			if (strpos($uri, $base_url) === 0)
 			{
 				// Remove the base URL from the URI
 				$uri = (string) substr($uri, strlen($base_url));
 			}
-      //do rewriting in htaccess.
-      /*
-			if (Kohana::$index_file AND strpos($uri, Kohana::$index_file) === 0)
+
+			if (URL::get_index_file() AND strpos($uri, URL::get_index_file()) === 0)
 			{
 				// Remove the index file from the URI
-				$uri = (string) substr($uri, strlen(Kohana::$index_file));
-			}*/
+				$uri = (string) substr($uri, strlen(URL::get_index_file()));
+			}
 		}
 
 		return $uri;
@@ -1229,32 +1228,14 @@ class Kohana_Request implements HTTP_Request {
 		{
 			$body = http_build_query($post, NULL, '&');
 			$this->body($body)
-				->headers('content-type', 'application/x-www-form-urlencoded; charset='.Kohana::$charset);
+				->headers('content-type', 'application/x-www-form-urlencoded; charset=utf-8');
 		}
 
 		// Set the content length
 		$this->headers('content-length', (string) $this->content_length());
 
-		// If Kohana expose, set the user-agent
-		if (Kohana::$expose)
-		{
-			$this->headers('user-agent', Kohana::version());
-		}
+		//EVENT_RENDER;
 
-		// Prepare cookies
-		if ($this->_cookies)
-		{
-			$cookie_string = array();
-
-			// Parse each
-			foreach ($this->_cookies as $key => $value)
-			{
-				$cookie_string[] = $key.'='.$value;
-			}
-
-			// Create the cookie string
-			$this->_header['cookie'] = implode('; ', $cookie_string);
-		}
 
 		$output = $this->method().' '.$this->uri().' '.$this->protocol()."\r\n";
 		$output .= (string) $this->_header;
