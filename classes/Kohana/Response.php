@@ -511,12 +511,7 @@ class Kohana_Response implements HTTP_Response {
 
 		// Manually stop execution
 		ignore_user_abort(TRUE);
-
-		if ( ! Kohana::$safe_mode)
-		{
-			// Keep the script running forever
-			set_time_limit(0);
-		}
+    
 
 		// Send data in 16kb blocks
 		$block = 1024 * 16;
