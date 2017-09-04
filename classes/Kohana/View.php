@@ -27,7 +27,8 @@ class Kohana_View {
 	 */
 	public static function factory($file = NULL, array $data = NULL)
 	{
-		return new View($file, $data);
+    $class_name = get_called_class();
+		return new $class_name($file, $data);
 	}
 
 	/**
@@ -47,10 +48,10 @@ class Kohana_View {
 		// Import the view variables to local namespace
 		extract($kohana_view_data, EXTR_SKIP);
 
-		if (View::$_global_data)
+		if (static::$_global_data)
 		{
 			// Import the global view variables to local namespace
-			extract(View::$_global_data, EXTR_SKIP | EXTR_REFS);
+			extract(static::$_global_data, EXTR_SKIP | EXTR_REFS);
 		}
 
 		// Capture the view output
@@ -75,15 +76,15 @@ class Kohana_View {
 	}
 
 	/**
-	 * Sets a global variable, similar to [View::set], except that the
+	 * Sets a global variable, similar to [static::set], except that the
 	 * variable will be accessible to all views.
 	 *
-	 *     View::set_global($name, $value);
+	 *     static::set_global($name, $value);
 	 *
 	 * You can also use an array or Traversable object to set several values at once:
 	 *
 	 *     // Create the values $food and $beverage in the view
-	 *     View::set_global(array('food' => 'bread', 'beverage' => 'water'));
+	 *     static::set_global(array('food' => 'bread', 'beverage' => 'water'));
 	 *
 	 * [!!] Note: When setting with using Traversable object we're not attaching the whole object to the view,
 	 * i.e. the object's standard properties will not be available in the view context.
@@ -98,20 +99,20 @@ class Kohana_View {
 		{
 			foreach ($key as $name => $value)
 			{
-				View::$_global_data[$name] = $value;
+				static::$_global_data[$name] = $value;
 			}
 		}
 		else
 		{
-			View::$_global_data[$key] = $value;
+			static::$_global_data[$key] = $value;
 		}
 	}
 
 	/**
-	 * Assigns a global variable by reference, similar to [View::bind], except
+	 * Assigns a global variable by reference, similar to [static::bind], except
 	 * that the variable will be accessible to all views.
 	 *
-	 *     View::bind_global($key, $value);
+	 *     static::bind_global($key, $value);
 	 *
 	 * @param   string  $key    variable name
 	 * @param   mixed   $value  referenced variable
@@ -119,7 +120,7 @@ class Kohana_View {
 	 */
 	public static function bind_global($key, & $value)
 	{
-		View::$_global_data[$key] =& $value;
+		static::$_global_data[$key] =& $value;
 	}
 
 	// View filename
@@ -130,13 +131,13 @@ class Kohana_View {
 
 	/**
 	 * Sets the initial view filename and local data. Views should almost
-	 * always only be created using [View::factory].
+	 * always only be created using [static::factory].
 	 *
 	 *     $view = new View($file);
 	 *
 	 * @param   string  $file   view filename
 	 * @param   array   $data   array of values
-	 * @uses    View::set_filename
+	 * @uses    static::set_filename
 	 */
 	public function __construct($file = NULL, array $data = NULL)
 	{
@@ -170,9 +171,9 @@ class Kohana_View {
 		{
 			return $this->_data[$key];
 		}
-		elseif (array_key_exists($key, View::$_global_data))
+		elseif (array_key_exists($key, static::$_global_data))
 		{
-			return View::$_global_data[$key];
+			return static::$_global_data[$key];
 		}
 		else
 		{
@@ -182,7 +183,7 @@ class Kohana_View {
 	}
 
 	/**
-	 * Magic method, calls [View::set] with the same parameters.
+	 * Magic method, calls [static::set] with the same parameters.
 	 *
 	 *     $view->foo = 'something';
 	 *
@@ -207,7 +208,7 @@ class Kohana_View {
 	 */
 	public function __isset($key)
 	{
-		return (isset($this->_data[$key]) OR isset(View::$_global_data[$key]));
+		return (isset($this->_data[$key]) OR isset(static::$_global_data[$key]));
 	}
 
 	/**
@@ -220,14 +221,14 @@ class Kohana_View {
 	 */
 	public function __unset($key)
 	{
-		unset($this->_data[$key], View::$_global_data[$key]);
+		unset($this->_data[$key], static::$_global_data[$key]);
 	}
 
 	/**
-	 * Magic method, returns the output of [View::render].
+	 * Magic method, returns the output of [static::render].
 	 *
 	 * @return  string
-	 * @uses    View::render
+	 * @uses    static::render
 	 */
 	public function __toString()
 	{
@@ -341,7 +342,7 @@ class Kohana_View {
 	 * @param   string  $file   view filename
 	 * @return  string
 	 * @throws  View_Exception
-	 * @uses    View::capture
+	 * @uses    static::capture
 	 */
 	public function render($file = NULL)
 	{
@@ -356,7 +357,7 @@ class Kohana_View {
 		}
 
 		// Combine local and global data and capture the output
-		return View::capture($this->_file, $this->_data);
+		return static::capture($this->_file, $this->_data);
 	}
 
 }
