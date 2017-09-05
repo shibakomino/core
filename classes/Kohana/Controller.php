@@ -3,6 +3,7 @@
 namespace Kohana;
 
 use \HTTP_Exception as HTTP_Exception;
+use \HTTP as HTTP;
 
 /**
  *
@@ -53,8 +54,9 @@ abstract class Controller
      * 3. After the controller action is called, the [Controller::after] method
      * will be called.
      *
-     * @throws  HTTP_Exception
      * @return  Response
+     * @throws
+     *
      */
     public function execute()
     {

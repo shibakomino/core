@@ -6,7 +6,6 @@ use \Kohana\Request as Request;
 use \Kohana\Response as Response;
 use \Request_Client as Request_Client;
 use \ReflectionClass as ReflectionClass;
-use \Exception as Exception;
 use \HTTP_Exception as HTTP_Exception;
 use \Kohana_Exception as Kohana_Exception;
 
@@ -102,7 +101,7 @@ class Internal extends Request_Client
 
             // Get the response via the Exception
             $response = $e->get_response();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Generate an appropriate Response object
             $response = Kohana_Exception::_handler($e);
         }

@@ -4,6 +4,7 @@ namespace Kohana;
 
 use \Arr as Arr;
 use \URL as URL;
+use \Kohana_Exception as Kohana_Exception;
 
 /**
  * Routes are used to determine the controller and action for a requested URI.

@@ -138,7 +138,6 @@ class Request implements HTTP\IRequest
      * @param   array $client_params Array of params to pass to the request client
      * @param   bool $allow_external Allow external requests? (deprecated in 3.3)
      * @param   array $injected_routes An array of routes to use, for testing
-     * @return  \Kohana\Request\Client
      */
 
     public function __construct($uri, $client_params = array(), $allow_external = true, $injected_routes = array())

@@ -129,16 +129,16 @@ final class Kohana
 
             $namespace = array_shift($matches[0]);
             $class = array_pop($matches[0]);
-            $subnamespace = implode(DIRECTORY_SEPARATOR, $matches[0]);
+            $subnamespace = implode('/', $matches[0]);
 
-            $file = $subnamespace . DIRECTORY_SEPARATOR . $class;
+            $file = $subnamespace . '/' . $class;
 
             if ($namespace === 'Kohana') {
                 $file = $namespace.'/'.$file;
             }
         } else {
             //no back slash found, use PSR-0
-            $file = str_replace('_', DIRECTORY_SEPARATOR, $class);
+            $file = str_replace('_', '/', $class);
         }
 
         if ($path = self::find_file($directory, $file)) {

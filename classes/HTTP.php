@@ -52,10 +52,6 @@ class HTTP
         throw $e->location($uri);
     }
 
-}
-
-
-class HTTPUtils{
     /**
      * Checks the browser cache to see the response needs to be returned,
      * execution will halt and a 304 Not Modified will be sent if the
@@ -93,6 +89,11 @@ class HTTPUtils{
 
         return $response;
     }
+
+}
+
+
+class HTTPUtils{
 
     /**
      * Parses a HTTP header string into an associative array

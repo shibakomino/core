@@ -5,7 +5,6 @@ namespace Kohana;
 use \Arr as Arr;
 use \HTTP_Header as HTTP_Header;
 use \Kohana_Exception as Kohana_Exception;
-use \Exception as Exception;
 
 
 /**
@@ -34,7 +33,7 @@ class Response implements HTTP\IResponse
      *      $response = Response::factory(array('status' => 200));
      *
      * @param   array $config Setup the response object
-     * @return  Response
+     * @return  HTTP\IResponse
      */
     public static function factory(array $config = array())
     {
@@ -315,7 +314,7 @@ class Response implements HTTP\IResponse
     public function generate_etag()
     {
         if ($this->_body === '') {
-            throw new Exception('No response yet associated with request - cannot auto generate resource ETag');
+            throw new \Exception('No response yet associated with request - cannot auto generate resource ETag');
         }
 
         // Generate a unique hash for the response

@@ -21,9 +21,10 @@ class Header extends ArrayObject
 {
     const DEFAULT_QUALITY = 1;
     static $str_default_content_type = 'Content-Type: text/html; charset=utf-8';
+    static $str_content_type_plain   = 'Content-Type: text/plain; charset=utf-8';
 
     // Default Accept-* quality value if none supplied
-    static $mime = [];
+    static $mimes = [];
     /**
      * @var     array    Accept: (content) types
      */
@@ -111,7 +112,7 @@ class Header extends ArrayObject
      */
     public static function parse_cache_control($cache_control)
     {
-        $directives = explode(',', strtolower($cache_control));
+        $directives = explode(',', array_map('strtolower', $cache_control));
 
         if ($directives === false)
             return false;
@@ -349,7 +350,7 @@ class Header extends ArrayObject
 
         // If not a real mime, try and find it in config
         if (strpos($type, '/') === false) {
-            $mime = static::$mime;
+            $mime = static::$mime[$type];
 
             if ($mime === null)
                 return false;
@@ -769,7 +770,7 @@ class Header extends ArrayObject
      * [!!] if you supply a custom header handler via `$callback`, it is
      *  recommended that `$response` is returned
      *
-     * @param   HTTP_Response $response header to send
+     * @param   IResponse $response header to send
      * @param   boolean $replace replace existing value
      * @param   callback $callback optional callback to replace PHP header function
      * @return  mixed

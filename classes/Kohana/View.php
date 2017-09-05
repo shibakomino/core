@@ -3,8 +3,9 @@
 namespace Kohana;
 
 use \Traversable as Traversable;
-use \Exception as Exception;
 use \Kohana as Kohana;
+use \Kohana_Exception as Kohana_Exception;
+use \View_Exception as View_Exception;
 
 /**
  * Acts as an object wrapper for HTML pages with embedded PHP, called "views".
@@ -68,7 +69,7 @@ class View
         try {
             // Load the view within the current scope
             include $kohana_view_filename;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Delete the output buffer
             ob_end_clean();
 
@@ -228,7 +229,7 @@ class View
     {
         try {
             return $this->render();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             /**
              * Display the exception message.
              *
@@ -248,7 +249,7 @@ class View
      *
      * @param   string $file view filename
      * @return  View
-     * @throws  View_Exception
+     * @throws  Kohana_Exception
      */
     public function set_filename($file)
     {
