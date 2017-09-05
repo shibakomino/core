@@ -214,6 +214,35 @@ class Route
     }
 
     /**
+     * new static method for 3.7
+    **/
+    public static $routes = [];
+
+    public static function add_route($name, $uri, $regex, $defaults, $weight)
+    {
+        static::$routes[$name] = [
+            'uri' => $uri,
+            'regex' => $regex,
+            'defaults' => $defaults,
+            'weight' => $weight,
+        ];
+    }
+
+    public static function make_routes()
+    {
+        $routes_to_sort = self::$routes;
+        usort($routes_to_sort, function ($a, $b) {
+            return $b['weight'] - $a['weight'];
+        });
+
+        foreach ($routes_to_sort as $key => $value) {
+            static::set($key, $value['uri'], $value['regex'])
+                ->defaults($value['defaults']);
+        }
+    }
+
+
+    /**
      * @var  array  route filters
      */
     protected $_filters = array();

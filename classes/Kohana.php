@@ -386,4 +386,30 @@ final class Kohana
     {
         return self::$environment;
     }
+
+
+    public static $sub_request_handlers = array();
+
+    public static function executeRequest()
+    {
+        $request = Request::factory(true, [], false);
+        $response = $request->execute();//param need to parse after execute.
+
+        //the status code will generate after execute;
+        //if status = 404, run the sub request handlers
+        //sub-request
+        if ($response->status() == 404) {
+            foreach (self::$sub_request_handlers as $handler) {
+                $response = $handler($request);
+                if ($response->status() < 400) break;// success, no need to handle by next handler
+            }
+
+        };
+
+        $result = $response
+            ->send_headers(true)
+            ->body();
+
+        return $result;
+    }
 }
