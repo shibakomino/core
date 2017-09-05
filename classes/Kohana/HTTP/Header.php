@@ -1,4 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php namespace Kohana\HTTP;
+use \ArrayObject as ArrayObject;
+use \Text as Text;
+use \HTTP_Response as HTTP_Response;
+
+
 /**
  * The Kohana_HTTP_Header class provides an Object-Orientated interface
  * to HTTP headers. This can parse header arrays returned from the
@@ -12,7 +17,7 @@
  * @copyright  (c) 2008-2014 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-class Kohana_HTTP_Header extends ArrayObject {
+class Header extends ArrayObject {
   static $str_default_content_type = 'Content-Type: text/html; charset=utf-8';
   static $mime = [];
 
@@ -41,7 +46,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 			// If there is no quality directive, return default
 			if ( ! preg_match($pattern, $value, $quality))
 			{
-				$parsed[$value] = (float) HTTP_Header::DEFAULT_QUALITY;
+				$parsed[$value] = (float) static::DEFAULT_QUALITY;
 			}
 			else
 			{
@@ -75,10 +80,10 @@ class Kohana_HTTP_Header extends ArrayObject {
 
 		// If there is no accept, lets accept everything
 		if ($accepts === NULL)
-			return array('*' => array('*' => (float) HTTP_Header::DEFAULT_QUALITY));
+			return array('*' => array('*' => (float) static::DEFAULT_QUALITY));
 
 		// Parse the accept header qualities
-		$accepts = HTTP_Header::accept_quality($accepts);
+		$accepts = static::accept_quality($accepts);
 
 		$parsed_accept = array();
 
@@ -113,10 +118,10 @@ class Kohana_HTTP_Header extends ArrayObject {
 	{
 		if ($charset === NULL)
 		{
-			return array('*' => (float) HTTP_Header::DEFAULT_QUALITY);
+			return array('*' => (float) static::DEFAULT_QUALITY);
 		}
 
-		return HTTP_Header::accept_quality(explode(',', (string) $charset));
+		return static::accept_quality(explode(',', (string) $charset));
 	}
 
 	/**
@@ -133,15 +138,15 @@ class Kohana_HTTP_Header extends ArrayObject {
 		// Accept everything
 		if ($encoding === NULL)
 		{
-			return array('*' => (float) HTTP_Header::DEFAULT_QUALITY);
+			return array('*' => (float) static::DEFAULT_QUALITY);
 		}
 		elseif ($encoding === '')
 		{
-			return array('identity' => (float) HTTP_Header::DEFAULT_QUALITY);
+			return array('identity' => (float) static::DEFAULT_QUALITY);
 		}
 		else
 		{
-			return HTTP_Header::accept_quality(explode(',', (string) $encoding));
+			return static::accept_quality(explode(',', (string) $encoding));
 		}
 	}
 
@@ -158,10 +163,10 @@ class Kohana_HTTP_Header extends ArrayObject {
 	{
 		if ($language === NULL)
 		{
-			return array('*' => array('*' => (float) HTTP_Header::DEFAULT_QUALITY));
+			return array('*' => array('*' => (float) static::DEFAULT_QUALITY));
 		}
 
-		$language = HTTP_Header::accept_quality(explode(',', (string) $language));
+		$language = static::accept_quality(explode(',', (string) $language));
 
 		$parsed_language = array();
 
@@ -351,7 +356,8 @@ class Kohana_HTTP_Header extends ArrayObject {
 
 		if ($replace OR ! $this->offsetExists($index))
 		{
-			return parent::offsetSet($index, $newval);
+			parent::offsetSet($index, $newval);
+			return;
 		}
 
 		$current_value = $this->offsetGet($index);
@@ -365,11 +371,11 @@ class Kohana_HTTP_Header extends ArrayObject {
 			$current_value = array($current_value, $newval);
 		}
 
-		return parent::offsetSet($index, $current_value);
+		parent::offsetSet($index, $current_value);
 	}
 
 	/**
-	 * Overloads the `ArrayObject::offsetExists()` method to ensure keys
+	 * Override the `ArrayObject::offsetExists()` method to ensure keys
 	 * are lowercase.
 	 *
 	 * @param   string  $index
@@ -382,7 +388,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 	}
 
 	/**
-	 * Overloads the `ArrayObject::offsetUnset()` method to ensure keys
+	 * Override the `ArrayObject::offsetUnset()` method to ensure keys
 	 * are lowercase.
 	 *
 	 * @param   string  $index
@@ -391,11 +397,11 @@ class Kohana_HTTP_Header extends ArrayObject {
 	 */
 	public function offsetUnset($index)
 	{
-		return parent::offsetUnset(strtolower($index));
+    parent::offsetUnset(strtolower($index));
 	}
 
 	/**
-	 * Overload the `ArrayObject::offsetGet()` method to ensure that all
+	 * Override the `ArrayObject::offsetGet()` method to ensure that all
 	 * keys passed to it are formatted correctly for this object.
 	 *
 	 * @param   string  $index  index to retrieve
@@ -408,7 +414,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 	}
 
 	/**
-	 * Overloads the `ArrayObject::exchangeArray()` method to ensure that
+	 * Override the `ArrayObject::exchangeArray()` method to ensure that
 	 * all keys are changed to lowercase.
 	 *
 	 * @param   mixed   $input
@@ -440,8 +446,6 @@ class Kohana_HTTP_Header extends ArrayObject {
 	 */
 	public function parse_header_string($resource, $header_line)
 	{
-		$headers = array();
-
 		if (preg_match_all('/(\w[^\s:]*):[ ]*([^\r\n]*(?:\r\n[ \t][^\r\n]*)*)/', $header_line, $matches))
 		{
 			foreach ($matches[0] as $key => $value)
@@ -487,13 +491,13 @@ class Kohana_HTTP_Header extends ArrayObject {
 				$accept = '*/*';
 			}
 
-			$this->_accept_content = HTTP_Header::parse_accept_header($accept);
+			$this->_accept_content = static::parse_accept_header($accept);
 		}
 
 		// If not a real mime, try and find it in config
 		if (strpos($type, '/') === FALSE)
 		{
-			$mime = static::mime;
+			$mime = static::$mime;
 
 			if ($mime === NULL)
 				return FALSE;
@@ -599,11 +603,11 @@ class Kohana_HTTP_Header extends ArrayObject {
 			if ($this->offsetExists('Accept-Charset'))
 			{
 				$charset_header = strtolower($this->offsetGet('Accept-Charset'));
-				$this->_accept_charset = HTTP_Header::parse_charset_header($charset_header);
+				$this->_accept_charset = static::parse_charset_header($charset_header);
 			}
 			else
 			{
-				$this->_accept_charset = HTTP_Header::parse_charset_header(NULL);
+				$this->_accept_charset = static::parse_charset_header(NULL);
 			}
 		}
 
@@ -685,7 +689,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 				$encoding_header = NULL;
 			}
 
-			$this->_accept_encoding = HTTP_Header::parse_encoding_header($encoding_header);
+			$this->_accept_encoding = static::parse_encoding_header($encoding_header);
 		}
 
 		// Normalize the encoding
@@ -704,7 +708,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 			}
 			elseif ($encoding === 'identity')
 			{
-				return (float) HTTP_Header::DEFAULT_QUALITY;
+				return (float) static::DEFAULT_QUALITY;
 			}
 		}
 
@@ -779,7 +783,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 				$language_header = NULL;
 			}
 
-			$this->_accept_language = HTTP_Header::parse_language_header($language_header);
+			$this->_accept_language = static::parse_language_header($language_header);
 		}
 
 		// Normalize the language
@@ -865,7 +869,7 @@ class Kohana_HTTP_Header extends ArrayObject {
 		$status = $response->status();
 
 		// Create the response header
-		$processed_headers = array($protocol.' '.$status.' '.Response::$messages[$status]);
+		$processed_headers = array($protocol.' '.$status.' '. \Response::$messages[$status]);
 
 		// Get the headers array
 		$headers = $response->headers()->getArrayCopy();

@@ -1,4 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana;
+
+use \Arr as Arr;
+use \URL as URL;
+
 /**
  * Routes are used to determine the controller and action for a requested URI.
  * Every route generates a regular expression which is used to match a URI
@@ -33,7 +38,7 @@
  * @copyright  (c) 2008-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-class Kohana_Route {
+class Route {
 
 	// Matches a URI group and captures the contents
 	const REGEX_GROUP   = '\(((?:(?>[^()]+)|(?R))*)\)';
@@ -90,7 +95,8 @@ class Kohana_Route {
 	 */
 	public static function set($name, $uri = NULL, $regex = NULL)
 	{
-		return static::$_routes[$name] = new Route($uri, $regex);
+    $class_name = get_called_class();
+		return static::$_routes[$name] = new $class_name($uri, $regex);
 	}
 
 	/**
@@ -104,7 +110,7 @@ class Kohana_Route {
 	 */
 	public static function get($name)
 	{
-		if ( ! isset(Route::$_routes[$name]))
+		if ( ! isset(static::$_routes[$name]))
 		{
 			throw new Kohana_Exception('The requested route does not exist: :route',
 				array(':route' => $name));
@@ -181,7 +187,7 @@ class Kohana_Route {
 	{
 		// The URI should be considered literal except for keys and optional parts
 		// Escape everything preg_quote would escape except for : ( ) < >
-		$expression = preg_replace('#'.Route::REGEX_ESCAPE.'#', '\\\\$0', $uri);
+		$expression = preg_replace('#'.static::REGEX_ESCAPE.'#', '\\\\$0', $uri);
 
 		if (strpos($expression, '(') !== FALSE)
 		{
@@ -190,14 +196,14 @@ class Kohana_Route {
 		}
 
 		// Insert default regex for keys
-		$expression = str_replace(array('<', '>'), array('(?P<', '>'.Route::REGEX_SEGMENT.')'), $expression);
+		$expression = str_replace(array('<', '>'), array('(?P<', '>'.static::REGEX_SEGMENT.')'), $expression);
 
 		if ($regex)
 		{
 			$search = $replace = array();
 			foreach ($regex as $key => $value)
 			{
-				$search[]  = "<$key>".Route::REGEX_SEGMENT;
+				$search[]  = "<$key>".static::REGEX_SEGMENT;
 				$replace[] = "<$key>$value";
 			}
 
@@ -282,7 +288,7 @@ class Kohana_Route {
 	 * If no parameter is passed, this method will act as a getter.
 	 *
 	 * @param   array   $defaults   key values
-	 * @return  $this or array
+	 * @return  $this | array
 	 */
 	public function defaults(array $defaults = NULL)
 	{

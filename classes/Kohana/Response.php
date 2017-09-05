@@ -1,4 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana;
+
+use \HTTP_Response as HTTP_Response;
+use \HTTP_Header as HTTP_Header;
+
 /**
  * Response wrapper. Created as the result of any [Request] execution
  * or utility method (i.e. Redirect). Implements standard HTTP
@@ -11,7 +16,7 @@
  * @license    http://kohanaframework.org/license
  * @since      3.1.0
  */
-class Kohana_Response implements HTTP_Response {
+class Response implements HTTP_Response {
 
 	/**
 	 * Factory method to create a new [Response]. Pass properties
@@ -28,7 +33,8 @@ class Kohana_Response implements HTTP_Response {
 	 */
 	public static function factory(array $config = array())
 	{
-		return new Response($config);
+    $class_name = get_called_class();
+		return new $class_name($config);
 	}
 
 	// HTTP status codes and messages
@@ -92,7 +98,7 @@ class Kohana_Response implements HTTP_Response {
 	protected $_status = 200;
 
 	/**
-	 * @var  HTTP_Header  Headers returned in the response
+	 * @var  HTTP\Header  Headers returned in the response
 	 */
 	protected $_header;
 
@@ -100,11 +106,6 @@ class Kohana_Response implements HTTP_Response {
 	 * @var  string      The response body
 	 */
 	protected $_body = '';
-
-	/**
-	 * @var  array       Cookies to be returned in the response
-	 */
-	protected $_cookies = array();
 
 	/**
 	 * @var  string      The response protocol
@@ -268,83 +269,7 @@ class Kohana_Response implements HTTP_Response {
 		return strlen($this->body());
 	}
 
-	/**
-	 * Set and get cookies values for this response.
-	 *
-	 *     // Get the cookies set to the response
-	 *     $cookies = $response->cookie();
-	 *
-	 *     // Set a cookie to the response
-	 *     $response->cookie('session', array(
-	 *          'value' => $value,
-	 *          'expiration' => 12352234
-	 *     ));
-	 *
-	 * @param   mixed   $key    cookie name, or array of cookie values
-	 * @param   string  $value  value to set to cookie
-	 * @return  string
-	 * @return  void
-	 * @return  [Response]
-	 */
-	public function cookie($key = NULL, $value = NULL)
-	{
-		// Handle the get cookie calls
-		if ($key === NULL)
-			return $this->_cookies;
-		elseif ( ! is_array($key) AND ! $value)
-			return Arr::get($this->_cookies, $key);
 
-		// Handle the set cookie calls
-		if (is_array($key))
-		{
-			reset($key);
-			while (list($_key, $_value) = each($key))
-			{
-				$this->cookie($_key, $_value);
-			}
-		}
-		else
-		{
-			if ( ! is_array($value))
-			{
-				$value = array(
-					'value' => $value,
-					'expiration' => Cookie::$expiration
-				);
-			}
-			elseif ( ! isset($value['expiration']))
-			{
-				$value['expiration'] = Cookie::$expiration;
-			}
-
-			$this->_cookies[$key] = $value;
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Deletes a cookie set to the response
-	 *
-	 * @param   string  $name
-	 * @return  Response
-	 */
-	public function delete_cookie($name)
-	{
-		unset($this->_cookies[$name]);
-		return $this;
-	}
-
-	/**
-	 * Deletes all cookies from this response
-	 *
-	 * @return  Response
-	 */
-	public function delete_cookies()
-	{
-		$this->_cookies = array();
-		return $this;
-	}
 
 	/**
 	 * Sends the response status and all set headers.
@@ -575,43 +500,14 @@ class Kohana_Response implements HTTP_Response {
 		if ( ! $this->_header->offsetExists('content-type'))
 		{
 			// Add the default Content-Type header if required
-			$this->_header['content-type'] = Kohana::$content_type.'; charset='.Kohana::$charset;
+			$this->_header['content-type'] =  HTTP\Header::$str_default_content_type;
 		}
 
 		// Set the content length
 		$this->headers('content-length', (string) $this->content_length());
 
-		// If Kohana expose, set the user-agent
-		if (Kohana::$expose)
-		{
-			$this->headers('user-agent', Kohana::version());
-		}
+		//EVENT_RENDER
 
-		// Prepare cookies
-		if ($this->_cookies)
-		{
-			if (extension_loaded('http'))
-			{
-				$cookies = version_compare(phpversion('http'), '2.0.0', '>=') ?
-					(string) new \http\Cookie($this->_cookies) :
-					http_build_cookie($this->_cookies);
-				$this->_header['set-cookie'] = $cookies;
-			}
-			else
-			{
-				$cookies = array();
-
-				// Parse each
-				foreach ($this->_cookies as $key => $value)
-				{
-					$string = $key.'='.$value['value'].'; expires='.date('l, d M Y H:i:s T', $value['expiration']);
-					$cookies[] = $string;
-				}
-
-				// Create the cookie string
-				$this->_header['set-cookie'] = $cookies;
-			}
-		}
 
 		$output = $this->_protocol.' '.$this->_status.' '.Response::$messages[$this->_status]."\r\n";
 		$output .= (string) $this->_header;

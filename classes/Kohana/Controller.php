@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana;
+
 /**
  * Abstract controller class. Controllers should only be created using a [Request].
  *
@@ -20,7 +22,7 @@
  * @copyright  (c) 2008-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-abstract class Kohana_Controller {
+abstract class Controller {
 
 	/**
 	 * @var  Request  Request that created the controller
@@ -120,11 +122,10 @@ abstract class Kohana_Controller {
 	 *
 	 * @param  string  $uri   URI to redirect to
 	 * @param  int     $code  HTTP Status code to use for the redirect
-	 * @throws HTTP_Exception
 	 */
 	public static function redirect($uri = '', $code = 302)
 	{
-		return HTTP::redirect( (string) $uri, $code);
+		HTTP::redirect( (string) $uri, $code);
 	}
 
 	/**

@@ -1,4 +1,11 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana\Request\Client;
+
+use \Kohana\Request as Request;
+use \Kohana\Response as Response;
+use \Request_Client as Request_Client;
+use \ReflectionClass as ReflectionClass;
+use \Exception as Exception;
 
 /**
  * Request Client for internal execution
@@ -10,7 +17,7 @@
  * @license    http://kohanaframework.org/license
  * @since      3.1.0
  */
-class Kohana_Request_Client_Internal extends Request_Client {
+class Internal extends Request_Client {
 
 	/**
 	 * @var    array
@@ -24,8 +31,9 @@ class Kohana_Request_Client_Internal extends Request_Client {
 	 *     $request->execute();
 	 *
 	 * @param   Request $request
+   * @param   Response $response
 	 * @return  Response
-	 * @throws  Kohana_Exception
+	 * @throws
 	 */
 	public function execute_request(Request $request, Response $response)
 	{
@@ -46,13 +54,13 @@ class Kohana_Request_Client_Internal extends Request_Client {
     //EVENT_EXECUTE_START
 
 		// Store the currently active request
-		$previous = Request::$current;
+		$previous = \Request::$current;
 
 		// Change the current request to this request
-		Request::$current = $request;
+		\Request::$current = $request;
 
 		// Is this the initial request
-		$initial_request = ($request === Request::$initial);
+		$initial_request = ($request === \Request::$initial);
 
 		try {
 			if ( ! class_exists($prefix.$controller)) {
@@ -96,7 +104,7 @@ class Kohana_Request_Client_Internal extends Request_Client {
 		}
 
 		// Restore the previous request
-		Request::$current = $previous;
+		\Request::$current = $previous;
 
 		//EVENT_EXECUTE_END
 

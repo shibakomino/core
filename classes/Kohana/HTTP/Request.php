@@ -1,4 +1,8 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana\HTTP;
+
+use \HTTP_Message as HTTP_Message;
+
 /**
  * A HTTP Request specific interface that adds the methods required
  * by HTTP requests. Over and above [Kohana_HTTP_Interaction], this
@@ -11,7 +15,7 @@
  * @copyright  (c) 2008-2014 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-interface Kohana_HTTP_Request extends HTTP_Message {
+interface Request extends HTTP_Message {
 
 	// HTTP Methods
 	const GET       = 'GET';

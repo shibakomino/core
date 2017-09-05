@@ -1,4 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana\Request;
+
+use \Arr as Arr;
+use \Kohana\Request as Request;
+use \Kohana\Response as Response;
+
 /**
  * Request Client. Processes a [Request] and handles [HTTP_Caching] if
  * available. Will usually return a [Response] object as a result of the
@@ -11,12 +17,7 @@
  * @license    http://kohanaframework.org/license
  * @since      3.1.0
  */
-abstract class Kohana_Request_Client {
-
-	/**
-	 * @var    Cache  Caching library for request caching
-	 */
-	protected $_cache;
+abstract class Client {
 
 	/**
 	 * @var  bool  Should redirects be followed?
@@ -88,9 +89,8 @@ abstract class Kohana_Request_Client {
 	 *     $request->execute();
 	 *
 	 * @param   Request   $request
-	 * @param   Response  $response
 	 * @return  Response
-	 * @throws  Kohana_Exception
+	 * @throws
 	 */
 	public function execute(Request $request)
 	{
@@ -104,10 +104,9 @@ abstract class Kohana_Request_Client {
 					));
 
 		// Execute the request and pass the currently used protocol
-		$orig_response = $response = Response::factory(array('_protocol' => $request->protocol()));
+		$orig_response = $response = \Response::factory(array('_protocol' => $request->protocol()));
 
-		if (($cache = $this->cache()) instanceof HTTP_Cache)
-			return $cache->execute($this, $request, $response);
+    //EVENT_EXECUTE;
 
 		$response = $this->execute_request($request, $response);
 
@@ -155,30 +154,13 @@ abstract class Kohana_Request_Client {
 	 */
 	abstract public function execute_request(Request $request, Response $response);
 
-	/**
-	 * Getter and setter for the internal caching engine,
-	 * used to cache responses if available and valid.
-	 *
-	 * @param   HTTP_Cache  $cache  engine to use for caching
-	 * @return  HTTP_Cache
-	 * @return  Request_Client
-	 */
-	public function cache(HTTP_Cache $cache = NULL)
-	{
-		if ($cache === NULL)
-			return $this->_cache;
-
-		$this->_cache = $cache;
-		return $this;
-	}
 
 	/**
 	 * Getter and setter for the follow redirects
 	 * setting.
 	 *
 	 * @param   bool  $follow  Boolean indicating if redirects should be followed
-	 * @return  bool
-	 * @return  Request_Client
+	 * @return  \Kohana\Request\Client | bool
 	 */
 	public function follow($follow = NULL)
 	{
@@ -195,8 +177,7 @@ abstract class Kohana_Request_Client {
 	 * headers array.
 	 *
 	 * @param   array  $follow_headers  Array of headers to be re-used when following a Location header
-	 * @return  array
-	 * @return  Request_Client
+	 * @return  \Kohana\Request\Client | array
 	 */
 	public function follow_headers($follow_headers = NULL)
 	{
@@ -219,7 +200,7 @@ abstract class Kohana_Request_Client {
 	 * FALSE to force the client to switch to GET following a 302 response.
 	 *
 	 * @param  bool  $strict_redirect  Boolean indicating if 302 redirects should be followed with the original method
-	 * @return Request_Client
+	 * @return \Kohana\Request\Client | bool
 	 */
 	public function strict_redirect($strict_redirect = NULL)
 	{
@@ -248,7 +229,7 @@ abstract class Kohana_Request_Client {
 	 *     );
 	 *
 	 * @param array $header_callbacks	Array of callbacks to trigger on presence of given headers
-	 * @return Request_Client
+	 * @return \Kohana\Request\Client | array
 	 */
 	public function header_callbacks($header_callbacks = NULL)
 	{
@@ -269,7 +250,7 @@ abstract class Kohana_Request_Client {
 	 * param before execution is aborted with a Request_Client_Recursion_Exception.
 	 *
 	 * @param int $depth  Maximum number of callback requests to execute before aborting
-	 * @return Request_Client|int
+	 * @return \Kohana\Request\Client | int
 	 */
 	public function max_callback_depth($depth = NULL)
 	{
@@ -286,7 +267,7 @@ abstract class Kohana_Request_Client {
 	 * how many recursions have been executed within the current request execution.
 	 *
 	 * @param int $depth  Current recursion depth
-	 * @return Request_Client|int
+	 * @return \Kohana\Request\Client | int
 	 */
 	public function callback_depth($depth = NULL)
 	{
@@ -318,7 +299,7 @@ abstract class Kohana_Request_Client {
 	 *
 	 * @param string|array $param
 	 * @param mixed $value
-	 * @return Request_Client|mixed
+	 * @return \Kohana\Request\Client | mixed
 	 */
 	public function callback_params($param = NULL, $value = NULL)
 	{
@@ -350,11 +331,10 @@ abstract class Kohana_Request_Client {
 	 * Assigns the properties of the current Request_Client to another
 	 * Request_Client instance - used when setting up a subsequent request.
 	 *
-	 * @param Request_Client $client
+	 * @param Client $client
 	 */
-	public function assign_client_properties(Request_Client $client)
+	public function assign_client_properties(Client $client)
 	{
-		$client->cache($this->cache());
 		$client->follow($this->follow());
 		$client->follow_headers($this->follow_headers());
 		$client->header_callbacks($this->header_callbacks());
@@ -371,9 +351,10 @@ abstract class Kohana_Request_Client {
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 * @param Request_Client $client
+	 * @param Client $client
+   * @return Request
 	 */
-	public static function on_header_location(Request $request, Response $response, Request_Client $client)
+	public static function on_header_location(Request $request, Response $response, Client $client)
 	{
 		// Do we need to follow a Location header ?
 		if ($client->follow() AND in_array($response->status(), array(201, 301, 302, 303, 307)))
@@ -388,7 +369,7 @@ abstract class Kohana_Request_Client {
 					break;
 				case 201:
 				case 303:
-					$follow_method = Request::GET;
+					$follow_method = \Kohana\HTTP\Request::GET;
 					break;
 				case 302:
 					// Cater for sites with broken HTTP redirect implementations
@@ -398,7 +379,7 @@ abstract class Kohana_Request_Client {
 					}
 					else
 					{
-						$follow_method = Request::GET;
+						$follow_method = \Kohana\HTTP\Request::GET;
 					}
 					break;
 			}
@@ -408,11 +389,11 @@ abstract class Kohana_Request_Client {
 			$follow_header_keys = array_intersect(array_keys($orig_headers), $client->follow_headers());
 			$follow_headers = \Arr::extract($orig_headers, $follow_header_keys);
 
-			$follow_request = Request::factory($response->headers('Location'))
+			$follow_request = \Request::factory($response->headers('Location'))
 			                         ->method($follow_method)
 			                         ->headers($follow_headers);
 
-			if ($follow_method !== Request::GET)
+			if ($follow_method !== \Kohana\HTTP\Request::GET)
 			{
 				$follow_request->body($request->body());
 			}

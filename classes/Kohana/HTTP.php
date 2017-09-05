@@ -1,4 +1,8 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana;
+
+use \HTTP_Header as HTTP_Header;
+
 /**
  * Contains the most low-level helpers methods in Kohana:
  *
@@ -14,7 +18,7 @@
  * @copyright  (c) 2008-2014 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-abstract class Kohana_HTTP {
+abstract class HTTP {
 
 	/**
 	 * @var  The default protocol to use if it cannot be detected
@@ -98,7 +102,7 @@ abstract class Kohana_HTTP {
 			$headers = version_compare(phpversion('http'), '2.0.0', '>=') ?
 				\http\Header::parse($header_string) :
 				http_parse_headers($header_string);
-			return new HTTP_Header($headers);
+			return new \Response($headers);
 		}
 
 		// Otherwise we use the slower PHP parsing

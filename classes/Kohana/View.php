@@ -1,4 +1,10 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana;
+
+use \Traversable as Traversable;
+use \Exception as Exception;
+use \Kohana as Kohana;
+
 /**
  * Acts as an object wrapper for HTML pages with embedded PHP, called "views".
  * Variables can be assigned with the view object and referenced locally within
@@ -10,7 +16,7 @@
  * @copyright  (c) 2008-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-class Kohana_View {
+class View {
 
 	// Array of global variables
 	protected static $_global_data = array();

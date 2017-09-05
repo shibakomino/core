@@ -1,4 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct script access.');
+<?php
+namespace Kohana;
+
+use \UTF8 as UTF8;
+use \Arr as Arr;
+
 /**
  * URL helper class.
  *
@@ -10,7 +15,7 @@
  * @copyright  (c) 2007-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-class Kohana_URL {
+class URL {
   static $base_url = '/';
   static $index_file = '';
   static $trusted_hosts = [];
@@ -160,7 +165,7 @@ class Kohana_URL {
 		}
 
 		// Concat the URL
-		return URL::base($protocol, $index).$path;
+		return static::base($protocol, $index).$path;
 	}
 
 	/**
