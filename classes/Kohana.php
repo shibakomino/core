@@ -177,7 +177,7 @@ final class Kohana
      * @return  boolean                           is modules ready to init?
      */
 
-    public static function modules($modules, $display_missing_module)
+    public static function modules($modules, $display_missing_module = false)
     {
         if (!isset($modules)) return false;
 
