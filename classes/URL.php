@@ -1,10 +1,5 @@
 <?php
 
-namespace Kohana;
-
-use \UTF8 as UTF8;
-use \Arr as Arr;
-
 /**
  * URL helper class.
  *
@@ -273,5 +268,18 @@ class URL
 
         // return FALSE as nothing is matched
         return false;
+    }
+
+    public static function get_scheme(){
+
+        if(!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])){
+            return $_SERVER['HTTP_X_FORWARDED_PROTO'];
+        }
+
+        if(!empty($_SERVER['HTTPS']) || ($_SERVER['SERVER_PORT']==443)){
+            return 'https';
+        }
+
+        return 'http';
     }
 }
