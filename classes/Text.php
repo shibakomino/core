@@ -585,6 +585,8 @@ class Text
         return preg_replace($widont_regex, '$1&nbsp;$2', $str);
     }
 
+    public static $browsers;
+    public static $group;
     /**
      * Returns information about the client user agent.
      *
@@ -601,7 +603,6 @@ class Text
      * @param   string $agent user_agent
      * @param   mixed $value array or string to return: browser, version, robot, mobile, platform
      * @return  mixed   requested information, FALSE if nothing is found
-     * @uses    Kohana::$config
      */
     public static function user_agent($agent, $value)
     {
@@ -620,7 +621,7 @@ class Text
             $info = array();
 
             // Load browsers
-            $browsers = Kohana::$config->load('user_agents')->browser;
+            $browsers = static::$browsers;
 
             foreach ($browsers as $search => $name) {
                 if (stripos($agent, $search) !== false) {
@@ -640,7 +641,7 @@ class Text
             }
         } else {
             // Load the search group for this type
-            $group = Kohana::$config->load('user_agents')->$value;
+            $group = static::$group;
 
             foreach ($group as $search => $name) {
                 if (stripos($agent, $search) !== false) {
