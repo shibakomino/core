@@ -1,8 +1,6 @@
 <?php
 namespace Kohana\HTTP;
 
-use \HTTP_Message as HTTP_Message;
-
 /**
  * A HTTP Request specific interface that adds the methods required
  * by HTTP requests. Over and above [Kohana_HTTP_Interaction], this
@@ -15,18 +13,7 @@ use \HTTP_Message as HTTP_Message;
  * @copyright  (c) 2008-2014 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-interface Request extends HTTP_Message {
-
-	// HTTP Methods
-	const GET       = 'GET';
-	const POST      = 'POST';
-	const PUT       = 'PUT';
-	const DELETE    = 'DELETE';
-	const HEAD      = 'HEAD';
-	const OPTIONS   = 'OPTIONS';
-	const TRACE     = 'TRACE';
-	const CONNECT   = 'CONNECT';
-
+interface Request extends Message {
 	/**
 	 * Gets or sets the HTTP method. Usually GET, POST, PUT or DELETE in
 	 * traditional CRUD applications.
@@ -42,7 +29,6 @@ interface Request extends HTTP_Message {
 	 * If no parameters are passed, the request will use the
 	 * default values defined in the Route.
 	 *
-	 * @param   array    $params  Optional parameters to include in uri generation
 	 * @return  string
 	 */
 	public function uri();

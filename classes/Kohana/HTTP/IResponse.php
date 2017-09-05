@@ -1,8 +1,6 @@
 <?php
 namespace Kohana\HTTP;
 
-use \HTTP_Message as HTTP_Message;
-
 /**
  * A HTTP Response specific interface that adds the methods required
  * by HTTP responses. Over and above [Kohana_HTTP_Interaction], this
@@ -15,7 +13,7 @@ use \HTTP_Message as HTTP_Message;
  * @copyright  (c) 2008-2014 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-interface Response extends HTTP_Message {
+interface Response extends Message {
 
 	/**
 	 * Sets or gets the HTTP status from this response.
