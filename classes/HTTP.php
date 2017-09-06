@@ -92,7 +92,7 @@ class HTTP
 
 }
 
-
+/*
 class HTTPUtils{
 
     /**
@@ -100,7 +100,7 @@ class HTTPUtils{
      *
      * @param   string $header_string Header string to parse
      * @return  HTTP_Header | Response
-     */
+     *//*
     public static function parse_header_string($header_string)
     {
         // If the PECL HTTP extension is loaded
@@ -154,7 +154,7 @@ class HTTPUtils{
      *      $request->headers = HTTP::request_headers();
      *
      * @return  HTTP_Header
-     */
+     *//*
     public static function request_headers()
     {
         // Setup the output
@@ -189,7 +189,7 @@ class HTTPUtils{
      *
      * @param   array $params Params
      * @return  string
-     */
+     *//*
     public static function www_form_urlencode(array $params = array())
     {
         if (!$params)
@@ -203,7 +203,7 @@ class HTTPUtils{
 
         return implode('&', $encoded);
     }
-}
+}*/
 
 /*
  * optimize

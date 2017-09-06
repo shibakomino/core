@@ -80,7 +80,7 @@ class Route
     /**
      * @var  array
      */
-    protected static $_routes = array();
+    public static $_routes = array();
 
     /**
      * Stores a named route and returns it. The "action" will always be set to

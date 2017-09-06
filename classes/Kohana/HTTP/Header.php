@@ -20,8 +20,10 @@ use \Text as Text;
 class Header extends ArrayObject
 {
     const DEFAULT_QUALITY = 1;
+
     static $str_default_content_type = 'Content-Type: text/html; charset=utf-8';
     static $str_content_type_plain   = 'Content-Type: text/plain; charset=utf-8';
+    static $str_content_type_form_value = 'application/x-www-form-urlencoded; charset=utf-8';
 
     // Default Accept-* quality value if none supplied
     static $mimes = [];
