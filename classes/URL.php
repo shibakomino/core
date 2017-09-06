@@ -148,7 +148,7 @@ class URL
 
         if (!UTF8::is_ascii($path)) {
             // Encode all non-ASCII characters, as per RFC 1738
-            $path = preg_replace_callback('~([^/]+)~', 'URL::_rawurlencode_callback', $path);
+            $path = preg_replace_callback('~([^/]+)~', 'static::_rawurlencode_callback', $path);
         }
 
         // Concat the URL
@@ -201,7 +201,7 @@ class URL
         }
 
         // Note: http_build_query returns an empty string for a params array with only NULL values
-        $query = http_build_query($params, '', '&');
+        $query = http_build_query($params);
 
         // Don't prepend '?' to an empty string
         return ($query === '') ? '' : ('?' . $query);
@@ -272,11 +272,11 @@ class URL
 
     public static function get_scheme(){
 
-        if(!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])){
+        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
             return $_SERVER['HTTP_X_FORWARDED_PROTO'];
         }
 
-        if(!empty($_SERVER['HTTPS']) || ($_SERVER['SERVER_PORT']==443)){
+        if (!empty($_SERVER['HTTPS']) || ($_SERVER['SERVER_PORT'] === 443)) {
             return 'https';
         }
 

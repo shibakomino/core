@@ -84,6 +84,7 @@ final class Kohana
         $_GET = self::sanitize($_GET);
         $_POST = self::sanitize($_POST);
         $_COOKIE = self::sanitize($_COOKIE);
+        $_REQUEST = self::sanitize($_REQUEST);
     }
 
     /**
@@ -100,21 +101,16 @@ final class Kohana
         if (is_array($value) OR is_object($value)) {
             foreach ($value as $key => $val) {
                 // Recursively clean each value
-                $value[$key] = self::sanitize($val);
+                $value[$key] = static::sanitize($val);
             }
         } elseif (is_string($value)) {
             if (strpos($value, "\r") !== false) {
                 // Standardize newlines
-                $value = str_replace(array("\r\n", "\r"), "\n", $value);
+                $value = str_replace(["\r\n", "\r"], "\n", $value);
             }
         }
 
         return $value;
-    }
-
-    public static function import($class, $directory = 'classes')
-    {
-        static::auto_load_PSR4($class, $directory);
     }
 
     //new autoloader compliant PSR4
@@ -143,7 +139,7 @@ final class Kohana
 
         if ($path = self::find_file($directory, $file)) {
             // Load the class file
-            require $path;
+            require_once $path;
 
             // Class has been found
             return true;
@@ -195,17 +191,17 @@ final class Kohana
             }
 
             // Add the module to include paths
-            $paths[] = $modules[$name] = realpath($path) . DIRECTORY_SEPARATOR;
+            $paths[] = $modules[$name] = realpath($path) . '/';
         }
 
         // Finish the include paths by adding SYSPATH
         $paths[] = SYSPATH;
 
         // Set the new include paths
-        self::$_paths = $paths;
+        static::$_paths = $paths;
 
         // Set the current module list
-        self::$_modules = $modules;
+        static::$_modules = $modules;
 
         return true;
     }
@@ -216,7 +212,7 @@ final class Kohana
 
     public static function modules_init()
     {
-        foreach (self::$_modules as $path) {
+        foreach (static::$_modules as $path) {
             $init = $path . 'init' . EXT;
             if (is_file($init)) {
                 // Include the module initialization file once
@@ -272,14 +268,14 @@ final class Kohana
             $ext = EXT;
         } elseif ($ext) {
             // Prefix the extension with a period
-            $ext = ".{$ext}";
+            $ext = '.'.$ext;
         } else {
             // Use no extension
             $ext = '';
         }
 
         // Create a partial path of the filename
-        $path = $dir . DIRECTORY_SEPARATOR . $file . $ext;
+        $path = $dir . '/' . $file . $ext;
 
         if ($array OR $dir === 'config' OR $dir === 'i18n' OR $dir === 'messages') {
             // Include paths must be searched in reverse
@@ -328,12 +324,12 @@ final class Kohana
     {
         if ($directory !== null) {
             // Add the directory separator
-            $directory .= DIRECTORY_SEPARATOR;
+            $directory .= '/';
         }
 
         if ($paths === null) {
             // Use the default paths
-            $paths = self::$_paths;
+            $paths = static::$_paths;
         }
 
         // Create an array for the files
@@ -388,28 +384,32 @@ final class Kohana
     }
 
 
-    public static $sub_request_handlers = array();
+    public static $sub_request_handlers = [];
 
     public static function executeRequest()
     {
-        $request = Request::factory(true, [], false);
-        $response = $request->execute();//param need to parse after execute.
+        try{
+            $request = Request::factory(true, [], false);
+            $response = $request->execute();//param need to parse after execute.
+            //the status code will generate after execute;
+            //if status = 404, run the sub request handlers
+            //sub-request
+            if ($response->status() == 404) {
+                foreach (self::$sub_request_handlers as $handler) {
+                    $response = $handler($request);
+                    if ($response->status() < 400) break;// success, no need to handle by next handler
+                }
 
-        //the status code will generate after execute;
-        //if status = 404, run the sub request handlers
-        //sub-request
-        if ($response->status() == 404) {
-            foreach (self::$sub_request_handlers as $handler) {
-                $response = $handler($request);
-                if ($response->status() < 400) break;// success, no need to handle by next handler
-            }
+            };
 
-        };
+            $result = $response
+                ->send_headers(true)
+                ->body();
+            return $result;
+        }catch(Exception $e){
 
-        $result = $response
-            ->send_headers(true)
-            ->body();
+        }
 
-        return $result;
+        return '';
     }
 }
